@@ -184,11 +184,12 @@ async function organizeWithAI() {
       body:JSON.stringify({event_type:"organize_note",client_payload:{...source,output_path:outputPath}})
     });
     $("save-hint").textContent="任务已提交。正在等待 GitHub Actions 完成 AI 整理…";
-    let result=null;
+    let result=null, outputSha=null;
     for(let attempt=0;attempt<120;attempt++){
       await new Promise(resolve=>setTimeout(resolve,3000));
       try{
         const file=await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/contents/"+outputPath+"?ref="+BRANCH);
+        outputSha=file.sha;
         const encoded=(file.content||"").replace(/\n/g,"");
         result=JSON.parse(decodeURIComponent(escape(atob(encoded))));
         break;
@@ -212,7 +213,7 @@ async function organizeWithAI() {
     $("save-button").textContent="保存到云端";
     $("save-hint").textContent="AI整理已完成。请核对数字、主体、日期和管理层表述，修改后点击「保存到云端」正式归档。";
     $("upload-status").textContent="AI整理完成 · "+raw.length.toLocaleString("zh-CN")+" 字符原文";
-    try{await githubDelete(outputPath,file.sha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}
+    if(outputSha){try{await githubDelete(outputPath,outputSha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}}
   }catch(e){
     $("save-hint").textContent="AI整理失败："+e.message+"。可在 GitHub Actions 查看任务日志。";
     $("upload-status").textContent="整理失败，请检查 Actions 运行记录。";
