@@ -82,10 +82,10 @@
     <form method="dialog" class="modal-close-row"><button class="close-button" aria-label="关闭">×</button></form>
     <p class="eyebrow">PRIVATE CLOUD ARCHIVE</p>
     <h2>连接 GitHub 私有仓库</h2>
-    <p class="modal-copy">使用 Fine-grained Personal Access Token，让网页读取和保存你自己的历史纪要。Token 仅保存在当前浏览器会话的 sessionStorage 中，关闭浏览器会话后需要重新输入。</p>
+    <p class="modal-copy">使用 Fine-grained Personal Access Token，让网页读取和保存你自己的历史纪要。Token 会保存在此浏览器的本机 localStorage 中，关闭浏览器或重启电脑后仍可自动连接。请勿在公用电脑上使用；清除此浏览器 Token 不会删除 GitHub 云端纪要。</p>
     <label class="field"><span>GitHub Token</span><input id="github-token" type="password" autocomplete="off" placeholder="github_pat_…"></label>
     <div class="permission-note"><b>Token 权限要求</b><ul><li>Resource owner：QSHao2022</li><li>Repository access：Only select repositories → research-archive</li><li>Repository permissions：Contents → Read and write</li></ul></div>
-    <div class="modal-actions"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">创建 Fine-grained Token ↗</a><button type="button" class="button button-primary" id="connect-button">连接并读取历史</button></div>
+    <div class="modal-actions"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">创建 Fine-grained Token ↗</a><button type="button" class="button button-quiet" id="disconnect-button">清除本机 Token</button><button type="button" class="button button-primary" id="connect-button">连接并读取历史</button></div>
     <p id="settings-message" class="settings-message"></p>
   </dialog>
   <script src="app.js"></script>
