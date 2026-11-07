@@ -158,6 +158,66 @@ async function handleMinutesFile(file) {
   finally { $("minutes-file").value=""; }
 }
 
+
+async function githubPut(path, content, message) {
+  const body={message,content:encodeBase64Utf8(content),branch:BRANCH};
+  return await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/contents/"+path,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+}
+async function githubDelete(path, sha) {
+  return await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/contents/"+path,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"Remove temporary raw minutes",sha,branch:BRANCH})});
+}
+async function organizeWithAI() {
+  const raw=$("minutes").value.trim();
+  if(!token){$("settings-dialog").showModal();$("settings-message").textContent="请先连接 GitHub 私有仓库。";return;}
+  if(!raw){$("save-hint").textContent="请先上传或粘贴原始会议纪要。";return;}
+  if(raw.length>60000){$("save-hint").textContent="原始纪要超过60,000字符，请拆分成两份分别整理。";return;}
+  const button=$("organize-button");
+  button.disabled=true;button.textContent="AI整理中…";
+  $("save-hint").textContent="正在将原始纪要安全提交至私有仓库并启动整理任务，请勿关闭页面。";
+  const id="note-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+  const inputPath=".research-workbench/inbox/"+id+".json";
+  const outputPath=".research-workbench/organized/"+id+".json";
+  let inputSha=null;
+  try {
+    const source={id,company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw,createdAt:new Date().toISOString()};
+    const saved=await githubPut(inputPath,JSON.stringify(source,null,2),"Upload raw meeting minutes for AI organization");
+    inputSha=saved.content.sha;
+    await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:"organize_note",client_payload:{id,input_path:inputPath,output_path:outputPath}})});
+    $("save-hint").textContent="AI正在整理：按原始纪要归纳经营数据、分业务情况及投资复盘。通常需要几十秒，请稍候…";
+    let result=null;
+    for(let attempt=0;attempt<90;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,4000));
+      try{
+        const file=await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/contents/"+outputPath+"?ref="+BRANCH);
+        const decoded=decodeURIComponent(escape(atob(file.content.replace(/\\n/g,""))));
+        result=JSON.parse(decoded);
+        break;
+      }catch(e){
+        if(!String(e.message||"").includes("Not Found") && !String(e.message||"").includes("404")) throw e;
+      }
+    }
+    if(!result) throw new Error("整理任务超过6分钟仍未返回。请查看 GitHub Actions 是否运行成功，再重试。");
+    $("company").value=result.company||source.company;
+    $("meeting-date").value=result.date||source.date;
+    $("note-title").value=result.title||source.title||"会议交流纪要";
+    $("minutes").value=result.minutes||"";
+    $("above").value=result.above||"";
+    $("below").value=result.below||"";
+    $("followup").value=result.followup||"";
+    $("judgment").value=result.judgment||"";
+    currentPath=null;currentSha=null;
+    $("editor-heading").textContent="AI整理结果（待审核）";
+    $("save-button").textContent="保存到云端";
+    $("save-hint").textContent="AI整理已完成。请核对数字、主体、日期和管理层表述，修改后点击「保存到云端」正式归档。";
+    $("upload-status").textContent="AI整理完成 · "+raw.length.toLocaleString("zh-CN")+" 字符原文";
+  }catch(e){
+    $("save-hint").textContent="AI整理失败："+e.message+"。可在 GitHub Actions 查看任务日志。";
+  }finally{
+    if(inputSha){try{await githubDelete(inputPath,inputSha);}catch(e){console.warn("Temporary source cleanup failed",e);}}
+    button.disabled=false;button.textContent="✦ AI整理纪要";
+  }
+}
+
 function init() {
   fillForm({date:new Date().toISOString().slice(0,10)});
   $("settings-button").addEventListener("click",()=>{$("github-token").value=token;$("settings-dialog").showModal();});
@@ -170,6 +230,7 @@ function init() {
   });
   $("disconnect-button").addEventListener("click",()=>{token="";localStorage.removeItem("research_archive_token");sessionStorage.removeItem("research_archive_token");notes=[];renderHistory();setStatus("尚未连接云端");$("settings-message").textContent="已清除此浏览器保存的 Token；GitHub 中的历史纪要不会删除。";$("save-hint").textContent="重新连接后即可读取云端历史。";});
   $("save-button").addEventListener("click",saveNote);
+  $("organize-button").addEventListener("click",organizeWithAI);
   $("choose-file-button").addEventListener("click",()=>$("minutes-file").click());
   $("minutes-file").addEventListener("change",e=>handleMinutesFile(e.target.files[0]));
   const uploadPanel=$("upload-panel");
