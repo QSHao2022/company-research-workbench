@@ -5,3 +5,5 @@
 @media(max-width:560px){.topbar{height:66px}.status{display:none}.hero{align-items:flex-start;gap:16px;flex-direction:column}.hero .button{align-self:flex-start}.editor-head{align-items:flex-start;gap:12px;flex-direction:column}.meta-grid{grid-template-columns:1fr}.field-wide{grid-column:auto}.modal-actions{align-items:flex-start;flex-direction:column}.template-intro span:not(.template-tag){max-width:220px;line-height:1.6}.section-title h3{line-height:1.5}}
 
 .minutes-card textarea{min-height:420px;line-height:1.85;font-size:13px;background:#fcfdff}.minutes-card{border-color:#dfe8f1;background:#fff}
+
+.upload-panel{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 15px;margin:0 0 12px;border:1px dashed #cbd8e5;border-radius:8px;background:#f8fafc;transition:.15s}.upload-panel.drag-over{border-color:#557da5;background:#edf4fa}.upload-copy{display:flex;flex:1 1 320px;flex-direction:column;gap:4px}.upload-copy b{font-size:12px;color:#34465b}.upload-copy span{font-size:10px;line-height:1.6;color:#8592a2}.upload-status{font-size:10px;color:#7e8b9c}.upload-status.error{color:#b44f4a}
