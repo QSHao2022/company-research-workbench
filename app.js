@@ -179,7 +179,7 @@ async function organizeWithAI() {
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),240000);
   try{
-    const response=await fetch(workerUrl.replace(/\\/$/,""),{
+    const response=await fetch((workerUrl.endsWith("/")?workerUrl.slice(0,-1):workerUrl),{
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw}),
       signal:controller.signal
@@ -213,7 +213,7 @@ async function organizeWithAI() {
 function init() {
   fillForm({date:new Date().toISOString().slice(0,10)});
   $("settings-button").addEventListener("click",()=>{$("github-token").value=token;$("ai-worker-url").value=localStorage.getItem("research_ai_worker_url")||"";$("settings-dialog").showModal();});
-  $("save-ai-settings").addEventListener("click",()=>{const url=$("ai-worker-url").value.trim();if(url&&!/^https:\\/\\/[^\\s]+$/.test(url)){$("settings-message").textContent="请输入有效的 https:// Worker 地址。";return;}if(url)localStorage.setItem("research_ai_worker_url",url);else localStorage.removeItem("research_ai_worker_url");$("settings-message").textContent=url?"AI服务地址已保存在本机浏览器。":"已清除 AI 服务地址。";});
+  $("save-ai-settings").addEventListener("click",()=>{const url=$("ai-worker-url").value.trim();if(url&&!url.startsWith("https://")){$("settings-message").textContent="请输入有效的 https:// Worker 地址。";return;}if(url)localStorage.setItem("research_ai_worker_url",url);else localStorage.removeItem("research_ai_worker_url");$("settings-message").textContent=url?"AI服务地址已保存在本机浏览器。":"已清除 AI 服务地址。";});
   $("connect-button").addEventListener("click",async()=>{
     const candidate=$("github-token").value.trim();
     if(!candidate){$("settings-message").textContent="请粘贴 GitHub Token。";return;}
