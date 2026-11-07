@@ -175,15 +175,11 @@ async function organizeWithAI() {
   button.disabled=true;button.textContent="AI整理中…";
   $("save-hint").textContent="正在将原始纪要安全提交至私有仓库并启动整理任务，请勿关闭页面。";
   const id="note-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
-  const inputPath=".research-workbench/inbox/"+id+".json";
   const outputPath=".research-workbench/organized/"+id+".json";
-  let inputSha=null;
   let outputSha=null;
   try {
     const source={id,company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw,createdAt:new Date().toISOString()};
-    const saved=await githubPut(inputPath,JSON.stringify(source,null,2),"Upload raw meeting minutes for AI organization");
-    inputSha=saved.content.sha;
-    await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:"organize_note",client_payload:{id,input_path:inputPath,output_path:outputPath}})});
+    await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:"organize_note",client_payload:{...source,output_path:outputPath}})});
     $("save-hint").textContent="AI正在整理：按原始纪要归纳经营数据、分业务情况及投资复盘。通常需要几十秒，请稍候…";
     let result=null;
     for(let attempt=0;attempt<90;attempt++){
