@@ -168,27 +168,40 @@ async function githubDelete(path, sha) {
 }
 async function organizeWithAI() {
   const raw=$("minutes").value.trim();
-  const workerUrl=localStorage.getItem("research_ai_worker_url")||"";
-  if(!workerUrl){$("settings-dialog").showModal();$("settings-message").textContent="请先完成一次 AI 服务连接：填写 Cloudflare Worker 地址。";return;}
+  if(!token){$("settings-dialog").showModal();$("settings-message").textContent="请先连接 GitHub 私有仓库。";return;}
   if(!raw){$("save-hint").textContent="请先上传或粘贴原始会议纪要。";return;}
   if(raw.length>60000){$("save-hint").textContent="原始纪要超过60,000字符，请拆分后整理。";return;}
   const button=$("organize-button");
   button.disabled=true;button.textContent="AI整理中…";
-  $("save-hint").textContent="正在直接调用 AI 整理服务（不再等待 GitHub Actions）。请保持页面打开。";
-  $("upload-status").textContent="正在提交原文并生成结构化纪要…";
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),240000);
+  $("save-hint").textContent="正在通过 GitHub Actions 调用 OpenAI API。任务启动后会自动回填整理结果，请保持页面打开。";
+  $("upload-status").textContent="正在启动 AI 整理任务…";
+  const id="note-"+Date.now()+"-"+Math.random().toString(36).slice(2,8);
+  const outputPath=".research-workbench/organized/"+id+".json";
   try{
-    const response=await fetch((workerUrl.endsWith("/")?workerUrl.slice(0,-1):workerUrl),{
+    const source={id,company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw,createdAt:new Date().toISOString()};
+    await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw}),
-      signal:controller.signal
+      body:JSON.stringify({event_type:"organize_note",client_payload:{...source,output_path:outputPath}})
     });
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(result.detail||result.error||("AI服务请求失败："+response.status));
-    $("company").value=result.company||$("company").value;
-    $("meeting-date").value=result.date||$("meeting-date").value;
-    $("note-title").value=result.title||$("note-title").value||"会议交流纪要";
+    $("save-hint").textContent="任务已提交。正在等待 GitHub Actions 完成 AI 整理…";
+    let result=null;
+    for(let attempt=0;attempt<120;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,3000));
+      try{
+        const file=await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/contents/"+outputPath+"?ref="+BRANCH);
+        const encoded=(file.content||"").replace(/\n/g,"");
+        result=JSON.parse(decodeURIComponent(escape(atob(encoded))));
+        break;
+      }catch(e){
+        const msg=String(e.message||"");
+        if(!msg.includes("Not Found")&&!msg.includes("404"))throw e;
+      }
+      if(attempt%10===9)$("save-hint").textContent="AI 正在整理中，已等待 "+((attempt+1)*3)+" 秒…";
+    }
+    if(!result)throw new Error("等待超过6分钟仍未返回结果。请检查 research-archive 仓库的 Actions 运行记录。");
+    $("company").value=result.company||source.company;
+    $("meeting-date").value=result.date||source.date;
+    $("note-title").value=result.title||source.title||"会议交流纪要";
     $("minutes").value=result.minutes||"";
     $("above").value=result.above||"";
     $("below").value=result.below||"";
@@ -197,15 +210,13 @@ async function organizeWithAI() {
     currentPath=null;currentSha=null;
     $("editor-heading").textContent="AI整理结果（待审核）";
     $("save-button").textContent="保存到云端";
-    const usage=result.usage?.total_tokens?(" · "+result.usage.total_tokens.toLocaleString("zh-CN")+" tokens"):"";
-    $("save-hint").textContent="AI整理已完成"+usage+"。请核对数字、主体、日期和管理层表述，修改后点击「保存到云端」正式归档。";
+    $("save-hint").textContent="AI整理已完成。请核对数字、主体、日期和管理层表述，修改后点击「保存到云端」正式归档。";
     $("upload-status").textContent="AI整理完成 · "+raw.length.toLocaleString("zh-CN")+" 字符原文";
+    try{await githubDelete(outputPath,file.sha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}
   }catch(e){
-    const message=e.name==="AbortError"?"请求超过4分钟，请稍后重试。":e.message;
-    $("save-hint").textContent="AI整理失败："+message;
-    $("upload-status").textContent="整理失败，请检查 AI 服务配置。";
+    $("save-hint").textContent="AI整理失败："+e.message+"。可在 GitHub Actions 查看任务日志。";
+    $("upload-status").textContent="整理失败，请检查 Actions 运行记录。";
   }finally{
-    clearTimeout(timeout);
     button.disabled=false;button.textContent="✦ AI整理纪要";
   }
 }
