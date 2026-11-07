@@ -7,3 +7,5 @@
 .minutes-card textarea{min-height:420px;line-height:1.85;font-size:13px;background:#fcfdff}.minutes-card{border-color:#dfe8f1;background:#fff}
 
 .upload-panel{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 15px;margin:0 0 12px;border:1px dashed #cbd8e5;border-radius:8px;background:#f8fafc;transition:.15s}.upload-panel.drag-over{border-color:#557da5;background:#edf4fa}.upload-copy{display:flex;flex:1 1 320px;flex-direction:column;gap:4px}.upload-copy b{font-size:12px;color:#34465b}.upload-copy span{font-size:10px;line-height:1.6;color:#8592a2}.upload-status{font-size:10px;color:#7e8b9c}.upload-status.error{color:#b44f4a}
+
+.button-ai{background:#edf3fb;color:#315b83;border:1px solid #d9e5f2}.button-ai:hover{background:#e2edf8}.button-ai:disabled{opacity:.6;cursor:wait}.ai-hint{display:flex;flex-direction:column;gap:5px;padding:13px 15px;margin:22px 0 4px;background:#f5f8fc;border:1px solid #e3ebf3;border-radius:8px}.ai-hint b{font-size:12px;color:#385b7d}.ai-hint span{font-size:11px;line-height:1.7;color:#748398}.editor-actions{flex-wrap:wrap}
