@@ -210,7 +210,7 @@ async function organizeWithAI() {
   }catch(e){
     $("save-hint").textContent="AI整理失败："+e.message+"。可在 GitHub Actions 查看任务日志。";
   }finally{
-    if(inputSha){try{await githubDelete(inputPath,inputSha);}catch(e){console.warn("Temporary source cleanup failed",e);}}\n    if(outputSha){try{await githubDelete(outputPath,outputSha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}}
+    if(outputSha){try{await githubDelete(outputPath,outputSha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}}
     button.disabled=false;button.textContent="✦ AI整理纪要";
   }
 }
