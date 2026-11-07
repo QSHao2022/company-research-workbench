@@ -3,7 +3,7 @@ const ARCHIVE_REPO = "research-archive";
 const BRANCH = "main";
 const API = "https://api.github.com";
 const $ = (id) => document.getElementById(id);
-const fields = ["company","meeting-date","note-title","above","below","followup","judgment"];
+const fields = ["company","meeting-date","note-title","minutes","above","below","followup","judgment"];
 let notes = [];
 let currentPath = null;
 let currentSha = null;
@@ -30,6 +30,7 @@ function noteFromForm() {
     company:$("company").value.trim(),
     date:$("meeting-date").value,
     title:$("note-title").value.trim(),
+    minutes:$("minutes").value.trim(),
     above:$("above").value.trim(),
     below:$("below").value.trim(),
     followup:$("followup").value.trim(),
@@ -41,6 +42,7 @@ function fillForm(note, path=null, sha=null) {
   $("company").value=note?.company||"";
   $("meeting-date").value=note?.date||new Date().toISOString().slice(0,10);
   $("note-title").value=note?.title||"";
+  $("minutes").value=note?.minutes||"";
   $("above").value=note?.above||"";
   $("below").value=note?.below||"";
   $("followup").value=note?.followup||"";
@@ -80,7 +82,7 @@ function renderHistory() {
   const companyFilter=$("filter-company").value.trim().toLowerCase();
   const year=$("filter-year").value;
   const filtered=notes.filter(n=>{
-    const hay=[n.company,n.title,n.above,n.below,n.followup,n.judgment].join(" ").toLowerCase();
+    const hay=[n.company,n.title,n.minutes,n.above,n.below,n.followup,n.judgment].join(" ").toLowerCase();
     return (!query||hay.includes(query))&&(!companyFilter||(n.company||"").toLowerCase().includes(companyFilter))&&(!year||(n.date||"").startsWith(year));
   });
   $("history-count").textContent=filtered.length;
