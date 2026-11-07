@@ -27,24 +27,14 @@
 ## 安全提示
 不要把 Token 发给任何人或提交到仓库。建议只给 Token 授权访问 `research-archive` 一个私有仓库，并设置合理的过期时间。网页是静态客户端，Token 在当前浏览器会话内用于访问 GitHub API。
 
-## AI 整理服务（首次部署一次）
+## AI 纪要整理（无需 Cloudflare）
 
-网页已改为直接调用 Cloudflare Worker，GitHub Actions 不再参与 AI 生成；GitHub 私有仓库仍只负责保存正式纪要和历史记录。
+AI 整理通过 `research-archive` 私有仓库中的 GitHub Actions 调用 OpenAI Responses API，不需要 Cloudflare、Vercel 或其他部署平台。
 
-1. 登录 Cloudflare Dashboard，进入 **Workers & Pages** → **Create** → **Create Worker**。
-2. 创建 Worker，名称可用 `research-minutes-ai`，进入代码编辑器。
-3. 将本仓库 `worker/index.js` 的完整内容复制到 Worker 编辑器，部署（Deploy）。
-4. 在 Worker 的 **Settings → Variables and Secrets** 中添加 Secret：
-   - 名称：`OPENAI_API_KEY`
-   - 值：你的 OpenAI API Key（sk-...）
-5. 可选添加普通变量 `OPENAI_MODEL`，默认 `gpt-6-luna`；若账户没有该模型权限，可改成账户可用的模型名称。
-6. 回到工作台 → 云端设置，把 Worker 的 `https://...workers.dev` 地址填入“AI 整理服务地址”，点击“保存 AI 服务地址”。
-7. GitHub Token 仍按原方式连接 `research-archive`。AI 整理完成后，检查结果并点击“保存到云端”。
+首次配置：
+1. 在 GitHub 私有仓库 `QSHao2022/research-archive` 的 Settings → Secrets and variables → Actions 中新增 Repository secret。
+2. 名称填写 `OPENAI_API_KEY`，值填写 OpenAI API Key。
+3. 确认仓库中的 `.github/workflows/organize-note.yml` 已启用，并且 GitHub Actions 有读写 Contents 的权限。
+4. 在研究工作台连接 `research-archive` 的 Fine-grained Token（Contents Read and write）。
 
-### 安全与数据流
-
-- OpenAI API Key 只保存在 Cloudflare Worker Secret，不放在网页、浏览器存储或 GitHub 仓库。
-- 原始纪要会从浏览器发送到你的 Worker，再由 Worker 转发至 OpenAI API。
-- AI 返回结果先显示在网页，人工检查后再由 GitHub Token 保存到私有历史仓库。
-- Worker 只允许来自 `https://qshao2022.github.io` 的网页请求。
-- 当前单次原文上限为 60,000 字符。长纪要请拆分后整理。
+使用时点击“AI整理纪要”，网页会触发 GitHub Actions；任务完成后自动读取临时整理结果并回填页面。核对后点击“保存到云端”归档正式纪要。AI 整理过程不再需要单独部署服务器。
