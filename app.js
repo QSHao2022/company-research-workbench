@@ -137,7 +137,7 @@ async function extractUploadedFile(file) {
       const content=await page.getTextContent();
       pages.push(content.items.map(item=>item.str).join(" "));
     }
-    return pages.join("\\n\\n");
+    return pages.join("\n\n");
   }
   throw new Error("暂不支持该文件格式，请上传 .docx、.pdf、.txt 或 .md 文件。");
 }
@@ -151,7 +151,7 @@ async function handleMinutesFile(file) {
     if(!text.trim()) throw new Error("未提取到正文。若PDF是扫描件/图片版，请先进行OCR识别后再上传。");
     const current=$("minutes").value.trim();
     const replace= !current || window.confirm("提取完成。点击“确定”替换当前纪要正文；点击“取消”则追加到现有内容末尾。");
-    $("minutes").value=replace?text.trim():current+"\\n\\n"+text.trim();
+    $("minutes").value=replace?text.trim():current+"\n\n"+text.trim();
     status.textContent="已提取："+file.name+"（"+text.trim().length.toLocaleString("zh-CN")+" 字符）";
     $("save-hint").textContent="文件文字已导入正文；请检查格式与内容后保存到云端。";
   } catch(e) { status.textContent=e.message; status.classList.add("error"); }
