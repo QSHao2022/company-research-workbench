@@ -56,7 +56,13 @@
           <div class="template-intro"><div><b>一、整理后的会议纪要</b><span>先呈现完整纪要正文，按业务板块分节，保留经营数据、管理层观点和项目进展。</span></div><span class="template-tag">核心内容</span></div>
           <div class="section-card minutes-card">
             <div class="section-title"><span class="section-number">01</span><div><h3>会议纪要正文</h3><p>按业绩总览、分业务经营情况、产能与项目、行业判断组织；保留重要数字、同比环比、价格、销量、库存、开工率及管理层原意。</p></div></div>
-            <textarea id="minutes" rows="22" placeholder="在这里粘贴或整理完整会议纪要……&#10;&#10;一、业绩总览&#10;……&#10;&#10;二、营养品业务&#10;……&#10;&#10;三、香精香料业务&#10;……&#10;&#10;四、其他业务及项目进展&#10;……"></textarea>
+            <div class="upload-panel" id="upload-panel">
+  <div class="upload-copy"><b>上传原始纪要文件</b><span>支持 Word（.docx）、PDF、TXT、Markdown。文件在浏览器本地提取文字，不会单独上传；保存纪要时，提取后的正文随纪要写入 GitHub。</span></div>
+  <input id="minutes-file" type="file" accept=".docx,.pdf,.txt,.md,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+  <button type="button" class="button button-quiet" id="choose-file-button">选择文件</button>
+  <span id="upload-status" class="upload-status">也可以将文件拖到这里</span>
+</div>
+<textarea id="minutes" rows="22" placeholder="在这里粘贴或整理完整会议纪要……&#10;&#10;一、业绩总览&#10;……&#10;&#10;二、营养品业务&#10;……&#10;&#10;三、香精香料业务&#10;……&#10;&#10;四、其他业务及项目进展&#10;……"></textarea>
           </div>
 
           <div class="template-intro"><div><b>二、投资复盘</b><span>在完整纪要之后，再提炼预期差、风险、待补问题和个人判断变化。</span></div><span class="template-tag">固定模板</span></div>
@@ -94,6 +100,8 @@
     <div class="modal-actions"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">创建 Fine-grained Token ↗</a><button type="button" class="button button-quiet" id="disconnect-button">清除本机 Token</button><button type="button" class="button button-primary" id="connect-button">连接并读取历史</button></div>
     <p id="settings-message" class="settings-message"></p>
   </dialog>
-  <script src="app.js?v=20261107-localstorage-fix"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="app.js?v=20261107-file-upload"></script>
 </body>
 </html>
