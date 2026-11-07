@@ -22,7 +22,7 @@
         <div>
           <p class="eyebrow">RESEARCH NOTES · REVIEW</p>
           <h1>公司研究纪要</h1>
-          <p class="hero-copy">记录预期差、关键问题与投资判断变化。所有正式纪要保存至你的 GitHub 私有仓库。</p>
+          <p class="hero-copy">先完整整理会议纪要，再提炼经营数据与投资判断。所有正式纪要保存至你的 GitHub 私有仓库。</p>
         </div>
         <button class="button button-primary" id="new-note-button">＋ 新建纪要</button>
       </section>
@@ -53,22 +53,28 @@
             <label class="field field-wide"><span>纪要标题</span><input id="note-title" placeholder="例如：2026年三季度业绩交流会"></label>
           </div>
 
-          <div class="template-intro"><div><b>核心复盘</b><span>按四个固定维度整理，保留事实、数据与判断依据。</span></div><span class="template-tag">固定模板</span></div>
+          <div class="template-intro"><div><b>一、整理后的会议纪要</b><span>先呈现完整纪要正文，按业务板块分节，保留经营数据、管理层观点和项目进展。</span></div><span class="template-tag">核心内容</span></div>
+          <div class="section-card minutes-card">
+            <div class="section-title"><span class="section-number">01</span><div><h3>会议纪要正文</h3><p>按业绩总览、分业务经营情况、产能与项目、行业判断组织；保留重要数字、同比环比、价格、销量、库存、开工率及管理层原意。</p></div></div>
+            <textarea id="minutes" rows="22" placeholder="在这里粘贴或整理完整会议纪要……&#10;&#10;一、业绩总览&#10;……&#10;&#10;二、营养品业务&#10;……&#10;&#10;三、香精香料业务&#10;……&#10;&#10;四、其他业务及项目进展&#10;……"></textarea>
+          </div>
+
+          <div class="template-intro"><div><b>二、投资复盘</b><span>在完整纪要之后，再提炼预期差、风险、待补问题和个人判断变化。</span></div><span class="template-tag">固定模板</span></div>
 
           <div class="section-card">
-            <div class="section-title"><span class="section-number">01</span><div><h3>超出预期，或者修正了我之前判断的地方</h3><p>记录超预期事项、边际改善，以及原有判断被修正的原因。</p></div></div>
+            <div class="section-title"><span class="section-number">02</span><div><h3>超出预期，或者修正了我之前判断的地方</h3><p>记录超预期事项、边际改善，以及原有判断被修正的原因。</p></div></div>
             <textarea id="above" rows="5" placeholder="核心数据、管理层表述、超预期因素……"></textarea>
           </div>
           <div class="section-card">
-            <div class="section-title"><span class="section-number">02</span><div><h3>低于预期，或者需要打折扣的地方</h3><p>记录低于预期的经营指标、兑现风险及需要谨慎看待的表述。</p></div></div>
+            <div class="section-title"><span class="section-number">03</span><div><h3>低于预期，或者需要打折扣的地方</h3><p>记录低于预期的经营指标、兑现风险及需要谨慎看待的表述。</p></div></div>
             <textarea id="below" rows="5" placeholder="低于预期的部分、潜在风险、需要打折扣的逻辑……"></textarea>
           </div>
           <div class="section-card">
-            <div class="section-title"><span class="section-number">03</span><div><h3>这次没问到，需要补问的</h3><p>沉淀本次交流的盲区，形成下一次调研或跟踪清单。</p></div></div>
+            <div class="section-title"><span class="section-number">04</span><div><h3>这次没问到，需要补问的</h3><p>沉淀本次交流的盲区，形成下一次调研或跟踪清单。</p></div></div>
             <textarea id="followup" rows="4" placeholder="待补充的问题、需要核实的数据、下一次调研提纲……"></textarea>
           </div>
           <div class="section-card judgment-card">
-            <div class="section-title"><span class="section-number">04</span><div><h3>我的判断有什么变化</h3><p>明确原判断、当前判断、变化依据及后续验证指标。</p></div></div>
+            <div class="section-title"><span class="section-number">05</span><div><h3>我的判断有什么变化</h3><p>明确原判断、当前判断、变化依据及后续验证指标。</p></div></div>
             <textarea id="judgment" rows="5" placeholder="原有判断 → 新判断；变化依据；仍待验证的关键变量……"></textarea>
           </div>
           <div class="editor-bottom"><span id="save-hint">填写公司名称和会议日期后即可保存。</span><span id="updated-at"></span></div>
