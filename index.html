@@ -100,11 +100,11 @@
     <label class="field"><span>AI 整理服务地址（Cloudflare Worker）</span><input id="ai-worker-url" type="url" autocomplete="url" placeholder="https://your-worker.your-subdomain.workers.dev"></label>
     <p class="modal-copy">AI 整理改为浏览器直接请求独立 Worker，不再排队等待 GitHub Actions。OpenAI API Key 保存在 Worker 的 Secret 中，不会暴露在网页或 GitHub 仓库。首次部署 Worker 后，把 Worker 地址粘贴到这里并点击“保存 AI 服务地址”。</p>
     <div class="permission-note"><b>Token 权限要求</b><ul><li>Resource owner：QSHao2022</li><li>Repository access：Only select repositories → research-archive</li><li>Repository permissions：Contents → Read and write</li></ul></div>
-    <div class="modal-actions"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">创建 Fine-grained Token ↗</a><button type="button" class="button button-quiet" id="disconnect-button">清除本机 Token</button><button type="button" class="button button-quiet" id="save-ai-settings">保存 AI 服务地址</button><button type="button" class="button button-primary" id="connect-button">连接并读取历史</button></div>
+    <div class="modal-actions"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">创建 Fine-grained Token ↗</a><button type="button" class="button button-quiet" id="disconnect-button">清除本机 Token</button><button type="button" class="button button-primary" id="connect-button">连接并读取历史</button></div>
     <p id="settings-message" class="settings-message"></p>
   </dialog>
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="app.js?v=20261107-direct-worker"></script>
+  <script src="app.js?v=20261107-github-actions"></script>
 </body>
 </html>
