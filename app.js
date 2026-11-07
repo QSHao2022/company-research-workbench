@@ -118,6 +118,46 @@ async function saveNote() {
   } catch(e) { $("save-hint").textContent="保存失败："+e.message; }
   finally { $("save-button").disabled=false;$("save-button").textContent=currentPath?"更新云端纪要":"保存到云端"; }
 }
+async function extractUploadedFile(file) {
+  const name=file.name.toLowerCase();
+  if(file.size>20*1024*1024) throw new Error("文件超过20MB，请拆分后上传。");
+  if(name.endsWith(".txt")||name.endsWith(".md")) return await file.text();
+  if(name.endsWith(".docx")) {
+    if(!window.mammoth) throw new Error("Word解析组件加载失败，请刷新页面后重试。");
+    const result=await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});
+    return result.value||"";
+  }
+  if(name.endsWith(".pdf")) {
+    if(!window.pdfjsLib) throw new Error("PDF解析组件加载失败，请刷新页面后重试。");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    const pages=[];
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      pages.push(content.items.map(item=>item.str).join(" "));
+    }
+    return pages.join("\\n\\n");
+  }
+  throw new Error("暂不支持该文件格式，请上传 .docx、.pdf、.txt 或 .md 文件。");
+}
+async function handleMinutesFile(file) {
+  if(!file) return;
+  const status=$("upload-status");
+  status.textContent="正在提取 "+file.name+" …";
+  status.classList.remove("error");
+  try {
+    const text=await extractUploadedFile(file);
+    if(!text.trim()) throw new Error("未提取到正文。若PDF是扫描件/图片版，请先进行OCR识别后再上传。");
+    const current=$("minutes").value.trim();
+    const replace= !current || window.confirm("提取完成。点击“确定”替换当前纪要正文；点击“取消”则追加到现有内容末尾。");
+    $("minutes").value=replace?text.trim():current+"\\n\\n"+text.trim();
+    status.textContent="已提取："+file.name+"（"+text.trim().length.toLocaleString("zh-CN")+" 字符）";
+    $("save-hint").textContent="文件文字已导入正文；请检查格式与内容后保存到云端。";
+  } catch(e) { status.textContent=e.message; status.classList.add("error"); }
+  finally { $("minutes-file").value=""; }
+}
+
 function init() {
   fillForm({date:new Date().toISOString().slice(0,10)});
   $("settings-button").addEventListener("click",()=>{$("github-token").value=token;$("settings-dialog").showModal();});
@@ -130,6 +170,12 @@ function init() {
   });
   $("disconnect-button").addEventListener("click",()=>{token="";localStorage.removeItem("research_archive_token");sessionStorage.removeItem("research_archive_token");notes=[];renderHistory();setStatus("尚未连接云端");$("settings-message").textContent="已清除此浏览器保存的 Token；GitHub 中的历史纪要不会删除。";$("save-hint").textContent="重新连接后即可读取云端历史。";});
   $("save-button").addEventListener("click",saveNote);
+  $("choose-file-button").addEventListener("click",()=>$("minutes-file").click());
+  $("minutes-file").addEventListener("change",e=>handleMinutesFile(e.target.files[0]));
+  const uploadPanel=$("upload-panel");
+  ["dragenter","dragover"].forEach(type=>uploadPanel.addEventListener(type,e=>{e.preventDefault();uploadPanel.classList.add("drag-over");}));
+  ["dragleave","drop"].forEach(type=>uploadPanel.addEventListener(type,e=>{e.preventDefault();uploadPanel.classList.remove("drag-over");}));
+  uploadPanel.addEventListener("drop",e=>handleMinutesFile(e.dataTransfer.files[0]));
   $("new-note-button").addEventListener("click",()=>{clearForm();renderHistory();});
   $("clear-button").addEventListener("click",clearForm);
   ["history-search","filter-company","filter-year"].forEach(id=>$(id).addEventListener(id==="filter-year"?"change":"input",renderHistory));
