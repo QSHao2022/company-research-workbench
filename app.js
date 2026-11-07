@@ -7,7 +7,7 @@ const fields = ["company","meeting-date","note-title","above","below","followup"
 let notes = [];
 let currentPath = null;
 let currentSha = null;
-let token = sessionStorage.getItem("research_archive_token") || "";
+let token = localStorage.getItem("research_archive_token") || sessionStorage.getItem("research_archive_token") || "";
 
 function setStatus(text, connected=false) {
   $("cloud-status").innerHTML = "<i></i>" + text;
@@ -123,13 +123,14 @@ function init() {
     const candidate=$("github-token").value.trim();
     if(!candidate){$("settings-message").textContent="请粘贴 GitHub Token。";return;}
     token=candidate;
-    try { await loadHistory();sessionStorage.setItem("research_archive_token",token);$("settings-dialog").close(); }
-    catch(e){token="";sessionStorage.removeItem("research_archive_token");}
+    try { await loadHistory();localStorage.setItem("research_archive_token",token);sessionStorage.removeItem("research_archive_token");$("settings-dialog").close(); }
+    catch(e){token=localStorage.getItem("research_archive_token") || "";sessionStorage.removeItem("research_archive_token");}
   });
+  $("disconnect-button").addEventListener("click",()=>{token="";localStorage.removeItem("research_archive_token");sessionStorage.removeItem("research_archive_token");notes=[];renderHistory();setStatus("尚未连接云端");$("settings-message").textContent="已清除此浏览器保存的 Token；GitHub 中的历史纪要不会删除。";$("save-hint").textContent="重新连接后即可读取云端历史。";});
   $("save-button").addEventListener("click",saveNote);
   $("new-note-button").addEventListener("click",()=>{clearForm();renderHistory();});
   $("clear-button").addEventListener("click",clearForm);
   ["history-search","filter-company","filter-year"].forEach(id=>$(id).addEventListener(id==="filter-year"?"change":"input",renderHistory));
-  if(token) loadHistory().catch(()=>{});
+  if(token) { localStorage.setItem("research_archive_token",token); sessionStorage.removeItem("research_archive_token"); loadHistory().catch(()=>{}); }
 }
 init();
