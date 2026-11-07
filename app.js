@@ -184,7 +184,7 @@ async function organizeWithAI() {
     inputSha=saved.content.sha;
     await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:"organize_note",client_payload:{id,input_path:inputPath,output_path:outputPath}})});
     $("save-hint").textContent="AI正在整理：按原始纪要归纳经营数据、分业务情况及投资复盘。通常需要几十秒，请稍候…";
-    let result=null;
+    let result=null;let outputSha=null;
     for(let attempt=0;attempt<90;attempt++){
       await new Promise(resolve=>setTimeout(resolve,4000));
       try{
@@ -213,7 +213,7 @@ async function organizeWithAI() {
   }catch(e){
     $("save-hint").textContent="AI整理失败："+e.message+"。可在 GitHub Actions 查看任务日志。";
   }finally{
-    if(inputSha){try{await githubDelete(inputPath,inputSha);}catch(e){console.warn("Temporary source cleanup failed",e);}}
+    if(inputSha){try{await githubDelete(inputPath,inputSha);}catch(e){console.warn("Temporary source cleanup failed",e);}}\n    if(outputSha){try{await githubDelete(outputPath,outputSha);}catch(e){console.warn("Temporary AI result cleanup failed",e);}}
     button.disabled=false;button.textContent="✦ AI整理纪要";
   }
 }
