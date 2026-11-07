@@ -178,13 +178,14 @@ async function organizeWithAI() {
   const inputPath=".research-workbench/inbox/"+id+".json";
   const outputPath=".research-workbench/organized/"+id+".json";
   let inputSha=null;
+  let outputSha=null;
   try {
     const source={id,company:$("company").value.trim(),date:$("meeting-date").value,title:$("note-title").value.trim(),raw,createdAt:new Date().toISOString()};
     const saved=await githubPut(inputPath,JSON.stringify(source,null,2),"Upload raw meeting minutes for AI organization");
     inputSha=saved.content.sha;
     await api("/repos/"+OWNER+"/"+ARCHIVE_REPO+"/dispatches",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event_type:"organize_note",client_payload:{id,input_path:inputPath,output_path:outputPath}})});
     $("save-hint").textContent="AI正在整理：按原始纪要归纳经营数据、分业务情况及投资复盘。通常需要几十秒，请稍候…";
-    let result=null;let outputSha=null;
+    let result=null;
     for(let attempt=0;attempt<90;attempt++){
       await new Promise(resolve=>setTimeout(resolve,4000));
       try{
